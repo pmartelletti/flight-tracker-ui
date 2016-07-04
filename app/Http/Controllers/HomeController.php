@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests;
 use Illuminate\Http\Request;
+use App\Services\RoutesService;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -29,6 +31,8 @@ class HomeController extends Controller
 
     public function welcome()
     {
+        RoutesService::create(env('SKYSCANNER_KEY'))
+            ->findSuitableRoutes('MLA', 'anywhere', Carbon::today()->addWeek(), Carbon::today()->addWeek()->addDays(4));
         $cities = $this->getAvailableCities();
         $days = $this->getDays();
 
