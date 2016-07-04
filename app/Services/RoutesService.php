@@ -1,7 +1,7 @@
 <?php
 namespace App\Services;
 
-use App\SuitableItineraries;
+use App\SuitableRoutes;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 
@@ -14,8 +14,8 @@ class RoutesService
     public function __construct($key = '')
     {
         $this->apiKey = $key;
-        $this->baseUri = 'http://partners.api.skyscanner.net/apiservices/browseroutes/v1.0/GB/GBP/en-GB';
-        $this->suitableItineraries = new SuitableItineraries(1);
+        $this->baseUri = 'http://partners.api.skyscanner.net/apiservices/browseroutes/v1.0/ES/EUR/en-GB';
+        $this->suitableRoutes = new SuitableRoutes();
     }
 
     public static function create($key)
@@ -23,13 +23,31 @@ class RoutesService
         return new RoutesService($key);
     }
 
-    public function findSuitableRoutes($origin, $destination, Carbon $from, Carbon $to)
+    public function findSuitableRoutes($origin, $destination, $startDate, $nights, $dayOfWeek, $weeksFlexibility)
+    {
+        $isStartingDay = sprintf('is%s', $dayOfWeek);
+        $start = (new Carbon($startDate));
+        if(!$start->$isStartingDay()) $start = $start->modify('next ' . $dayOfWeek);
+        $end = $start->copy()->addWeeks($weeksFlexibility);
+        $dates = new \DatePeriod($start, new \DateInterval( 'P1W'), $end);
+        foreach($dates as $date) {
+            $currentStart = Carbon::instance($date);
+            $currentEnd = $currentStart->copy()->addDays($nights);
+            $this->findRoutesForDates($origin, $destination, $currentStart, $currentEnd);
+        }
+
+        $name = "Available {$nights} nights trip from {$origin} to {$destination}, starting on {$startDate}, for the following {$weeksFlexibility} {$dayOfWeek}s";
+
+        return $this->suitableRoutes->setName($name);
+    }
+
+    private function findRoutesForDates($origin, $destination, Carbon $from, Carbon $to)
     {
         $client = new Client();
         $url = sprintf('%s/%s/%s/%s/%s?apiKey=%s', $this->baseUri, $origin, $destination, $from->format('Y-m-d'), $to->format('Y-m-d'), $this->apiKey);
         $response = $client->request('GET', $url);
-        $json_results = json_decode((string) $response->getBody(), true);
-        $quotes = collect($json_results['Quotes'])->sortBy('MinPrice');
-        dd($quotes->all(), $json_results);
+        $jsonResults = json_decode((string) $response->getBody(), true);
+
+        $this->suitableRoutes->parseAndAdd($jsonResults);
     }
 }

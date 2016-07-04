@@ -31,8 +31,6 @@ class HomeController extends Controller
 
     public function welcome()
     {
-        RoutesService::create(env('SKYSCANNER_KEY'))
-            ->findSuitableRoutes('MLA', 'anywhere', Carbon::today()->addWeek(), Carbon::today()->addWeek()->addDays(4));
         $cities = $this->getAvailableCities();
         $days = $this->getDays();
 
@@ -41,9 +39,21 @@ class HomeController extends Controller
 
     public function findFlights(Request $request)
     {
-        // use chace to store results
+//        dd($request->all());
+        $routes = RoutesService::create(env('SKYSCANNER_KEY'))
+            ->findSuitableRoutes(
+                $request->get('fromCity'),
+                $request->get('toCity'),
+                $request->get('startDate'),
+                $request->get('tripDays'),
+                $request->get('departureDay'),
+                $request->get('howFar')
+            )
+        ;
 
-        return view('results');
+        return view('results', [
+            'routes' => $routes
+        ]);
     }
 
     private function getDays()

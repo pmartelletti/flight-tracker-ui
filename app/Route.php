@@ -3,7 +3,7 @@ namespace App;
 use App\Flight;
 use App\Itinerary;
 
-class Itinerary
+class Route
 {
     private $price; // in EUR, for the moment. @TODO: implement Money class?
     private $outbound;
@@ -18,7 +18,7 @@ class Itinerary
         $this->bookingLinks = [];
     }
 
-    public function nicest(Itinerary $other)
+    public function nicest(Route $other)
     {
         return $this->agony() < $other->agony();
     }

@@ -16,3 +16,4 @@ Route::get('/', 'HomeController@welcome');
 Route::auth();
 
 Route::get('/home', 'HomeController@index');
+Route::any('/results', 'HomeController@findFlights');

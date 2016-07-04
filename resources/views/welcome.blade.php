@@ -8,7 +8,7 @@
                 <div class="panel-heading">Find your flight</div>
 
                 <div class="panel-body">
-                  <form class="form-horizontal" role="form" method="POST" action="{{ url('/register') }}">
+                  <form class="form-horizontal" role="form" method="POST" action="{{ url('/results') }}">
                       {{ csrf_field() }}
 
                       <div class="row">
@@ -51,16 +51,6 @@
                               </div>
                           </div>
 
-                          {{-- weeks to look for --}}
-                          <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                              <label for="howFar" class="col-md-4 control-label"># Weeks Flexibility</label>
-
-                              <div class="col-md-8">
-                                <input type="text" name="howFar" class="form-control" placeholder="i.e: 10">
-                                <p class="help-block">Starting from departure date, how many weeks in the future flights can be. More flexibility can help to find cheaper prices.</p>
-                              </div>
-                          </div>
-
                         </div>
 
                         {{-- left column --}}
@@ -70,7 +60,8 @@
                               <label for="toCity" class="col-md-4 control-label">To</label>
 
                               <div class="col-md-8">
-                                <select name="toCity" class="form-control" multiple="multiple">
+                                <select name="toCity" class="form-control">
+                                <option value="anywhere" selected="selected">Anywhere</option>
                                   @foreach($cities as $iso => $city)
                                     <option value="{{ $iso }}">{{ $city }}</option>
                                   @endforeach
@@ -88,15 +79,25 @@
                               </div>
                           </div>
 
-                          {{-- max leg duration  --}}
-                          <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                              <label for="legDuration" class="col-md-4 control-label">Max Leg duration (hs.)? </label>
+                            {{-- weeks to look for --}}
+                            <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
+                                <label for="howFar" class="col-md-4 control-label"># Weeks Flexibility</label>
 
-                              <div class="col-md-8">
-                                <input type="text" name="legDuration" class="form-control" placeholder="i.e: 3">
-                                <p class="help-block">This is the max time you'd like to take to arrive at destination (including stops).</p>
-                              </div>
-                          </div>
+                                <div class="col-md-8">
+                                    <input type="text" name="howFar" class="form-control" placeholder="i.e: 10">
+                                    <p class="help-block">Starting from departure date, how many weeks in the future flights can be. More flexibility can help to find cheaper prices.</p>
+                                </div>
+                            </div>
+
+                          {{-- max leg duration  --}}
+                          {{--<div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">--}}
+                              {{--<label for="legDuration" class="col-md-4 control-label">Max Leg duration (hs.)? </label>--}}
+
+                              {{--<div class="col-md-8">--}}
+                                {{--<input type="text" name="legDuration" class="form-control" placeholder="i.e: 3">--}}
+                                {{--<p class="help-block">This is the max time you'd like to take to arrive at destination (including stops).</p>--}}
+                              {{--</div>--}}
+                          {{--</div>--}}
 
                         </div>
                       </div>
