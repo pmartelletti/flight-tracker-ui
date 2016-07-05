@@ -28,13 +28,25 @@
                     <div class="form-group">
                         <div class="input-group">
                             <select v-model="filters.carrier" class="form-control">
-                                <option value="">All</option>
-                                <option v-for="carrier in carriers" :value="carrier">
+                                <option value="">All Carriers</option>
+                                <option v-for="carrier in carriers | orderBy 'carrier' " :value="carrier">
                                     @{{ carrier }}
                                 </option>
                             </select>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <div class="input-group">
+                            <select v-model="filters.destination" class="form-control">
+                                <option value="">All Destinations</option>
+                                <option v-for="destination in destinations | orderBy 'destination'" :value="destination">
+                                    @{{ destination }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
                         <div class="input-group">
@@ -63,7 +75,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <template v-for="route in routes | filterBy filters.carrier | filterBy priceRangeFilter | sortBy price">
+                    <template v-for="route in routes | orderBy 'price' | filterBy filters.destination | filterBy filters.carrier | filterBy priceRangeFilter ">
                         <tr>
                             <td>@{{ route.outbound.carrier }}</td>
                             <td>@{{ route.outbound.origin }}</td>

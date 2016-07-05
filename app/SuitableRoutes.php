@@ -17,11 +17,14 @@ class SuitableRoutes implements \IteratorAggregate
     /** @var Collection */
     private $routes;
 
+    private $destinations;
+
     private $name;
 
     public function __construct()
     {
         $this->carriers = new Collection();
+        $this->destinations = new Collection();
         $this->places = new Collection();
         $this->placesCodes = new Collection();
         $this->routes = new Collection();
@@ -89,6 +92,15 @@ class SuitableRoutes implements \IteratorAggregate
             ];
         })->each(function($quote){
             $this->getRoutes()->push($quote);
+        });
+
+        $this->getRoutes()->unique(function($route){
+            return $route['outbound']['destination'];
+        })->map(function($route) {
+
+            return $route['outbound']['destination'];
+        })->each(function($destination){
+            $this->destinations->push($destination);
         });
 
         return $this;
@@ -230,7 +242,8 @@ class SuitableRoutes implements \IteratorAggregate
     {
         return [
             'name' => $this->name,
-            'carriers' => $this->getCarriers()->all(),
+            'carriers' => $this->getCarriers()->values()->all(),
+            'destinations' => $this->destinations->values()->all(),
             'routes' => $this->getRoutes()->sortBy('price')->all(),
             'priceRange' => [
                 'min' => $this->getRoutes()->pluck('price')->min(),

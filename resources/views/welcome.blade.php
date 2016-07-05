@@ -152,6 +152,7 @@
           processing: false,
           routes: null,
           carriers: null,
+          destinations: '',
           airports: null,
           priceRange: null,
           filters: {
@@ -160,6 +161,7 @@
                   max: 1000
               },
               carrier: '',
+              destination: '',
               query: ''
           },
           searchName: ''
@@ -173,10 +175,10 @@
                 this.searchName = data.name
                 this.routes = data.routes
                 this.carriers = data.carriers
-//                this.airports = []
-                this.processing = false
+                this.destinations = data.destinations;
                 this.priceRange = {min: data.priceRange.min, max: data.priceRange.max }
                 this.filters.priceRange = data.priceRange
+                this.processing = false
               }).catch(error => {
                   alert('Error! Please try again later.')
                   this.processing = false
@@ -186,10 +188,12 @@
             this.routes = null
             this.carriers = null
             this.airports = null
+            this.destinations = null
           },
           resetFilters() {
                 this.filters.priceRange = this.priceRange
                 this.filters.carrier = ''
+                this.filters.destination = ''
           },
           priceRangeFilter: function(value) {
             var price = value.$value.price
