@@ -46,10 +46,12 @@
             </div>
 
             <div class="collapse navbar-collapse" id="app-navbar-collapse">
-                {{-- <!-- Left Side Of Navbar -->
+                 <!-- Left Side Of Navbar -->
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url('/home') }}">Home</a></li>
-                </ul> --}}
+                    <li><a href="{{ url('/') }}">Home</a></li>
+                    <li><a href="#">Find trips from your city</a></li>
+                    <li><a href="#">Find flights for destination</a></li>
+                </ul>
 
                 <!-- Right Side Of Navbar -->
                 <ul class="nav navbar-nav navbar-right">
@@ -79,11 +81,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js" integrity="sha384-I6F5OKECLVtK/BL+8iSLDEHowSAfUo76ZL9+kGAgTRdiByINKJaqTPH/QVNS1VDb" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/0.9.3/vue-resource.min.js"></script>
     {{-- <script src="{{ elixir('js/app.js') }}"></script> --}}
+    {{--<script type="text/javascript">--}}
+      {{--$(document).ready(function(){--}}
+        {{--$('select').select2();--}}
+      {{--});--}}
+    {{--</script>--}}
     <script type="text/javascript">
-      $(document).ready(function(){
-        $('select').select2();
-      });
+        Vue.use(VueResource);
+        Vue.config.devtools = true
     </script>
     @yield('scripts')
 </body>

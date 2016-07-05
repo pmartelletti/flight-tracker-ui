@@ -47,13 +47,16 @@ class HomeController extends Controller
                 $request->get('startDate'),
                 $request->get('tripDays'),
                 $request->get('departureDay'),
-                $request->get('howFar')
+                $request->get('howFar'),
+                $request->getClientIp()
             )
         ;
 
-        return view('results', [
-            'routes' => $routes
-        ]);
+        return $routes->serialize();
+
+//        return view('results', [
+//            'routes' => $routes
+//        ]);
     }
 
     private function getDays()

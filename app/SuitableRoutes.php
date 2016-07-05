@@ -12,6 +12,8 @@ class SuitableRoutes implements \IteratorAggregate
     /** @var Collection */
     private $places;
 
+    private $placesCodes;
+
     /** @var Collection */
     private $routes;
 
@@ -21,6 +23,7 @@ class SuitableRoutes implements \IteratorAggregate
     {
         $this->carriers = new Collection();
         $this->places = new Collection();
+        $this->placesCodes = new Collection();
         $this->routes = new Collection();
         $this->name = '';
     }
@@ -81,7 +84,8 @@ class SuitableRoutes implements \IteratorAggregate
                     'origin' => $self->getPlaces()->get($inbound['OriginId']),
                     'destination' => $self->getPlaces()->get($inbound['DestinationId']),
                     'departureDate' => (new Carbon($inbound['DepartureDate']))->format('d/m/Y')
-                ]
+                ],
+                'referralUrl' => $self->createReferralLink($outbound['OriginId'], $outbound['DestinationId'], $outbound['DepartureDate'], $inbound['DepartureDate'])
             ];
         })->each(function($quote){
             $this->getRoutes()->push($quote);
@@ -90,16 +94,36 @@ class SuitableRoutes implements \IteratorAggregate
         return $this;
     }
 
+    public function createReferralLink($origin, $destination, $from, $to)
+    {
+        $url = 'http://partners.api.skyscanner.net/apiservices/referral/v1.0/GB/EUR/en-GB/%s/%s/%s/%s?apiKey=%s';
+
+        return sprintf(
+            $url,
+            $this->getPlacesCodes()->get($origin),
+            $this->getPlacesCodes()->get($destination),
+            (new Carbon($from))->format('Y-m-d'),
+            (new Carbon($to))->format('Y-m-d'),
+            env('SKYSCANNER_SHORT_KEY')
+        );
+    }
+
+    public function getPlacesCodes()
+    {
+        return $this->placesCodes;
+    }
+
     /**
      * @param $data
      * @return $this
      */
     protected function parsePlaces($data)
     {
-        collect($data)->groupBy('PlaceId')->map(function($places){
-            return collect($places)->pluck('Name')->first();
+        collect($data)->groupBy('PlaceId')->map(function($place){
+            return collect(collect($place)->first());
         })->each(function($place, $key) {
-            $this->getPlaces()->put($key, $place);
+            $this->getPlaces()->put($key, $place->get('Name'));
+            $this->placesCodes->put($key, $place->get('SkyscannerCode'));
         });
 
         return $this;
@@ -200,5 +224,18 @@ class SuitableRoutes implements \IteratorAggregate
     {
         $this->routes = $routes;
         return $this;
+    }
+
+    public function serialize()
+    {
+        return [
+            'name' => $this->name,
+            'carriers' => $this->getCarriers()->all(),
+            'routes' => $this->getRoutes()->sortBy('price')->all(),
+            'priceRange' => [
+                'min' => $this->getRoutes()->pluck('price')->min(),
+                'max' => $this->getRoutes()->pluck('price')->max()
+            ]
+        ];
     }
 }

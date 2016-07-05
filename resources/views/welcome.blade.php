@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container" id="app" xmlns="http://www.w3.org/1999/html">
+    <template v-if="!routes">
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">Find your flight</div>
 
                 <div class="panel-body">
-                  <form class="form-horizontal" role="form" method="POST" action="{{ url('/results') }}">
-                      {{ csrf_field() }}
+                  <form class="form-horizontal" role="form" method="GET" action="{{ url('/api/classic-form') }}">
 
                       <div class="row">
                         {{-- right column  --}}
@@ -46,7 +46,7 @@
                               <label for="startDate" class="col-md-4 control-label">Start Day? </label>
 
                               <div class="col-md-8">
-                                <input type="date" name="startDate" class="form-control" placeholder="i.e: 3">
+                                <input type="date" name="startDate" class="form-control" value="{{ date('Y-m-d') }}">
                                 <p class="help-block">Leave empty if you want to start looking from this week.</p>
                               </div>
                           </div>
@@ -75,7 +75,7 @@
                               <label for="tripDays" class="col-md-4 control-label">How many nights? </label>
 
                               <div class="col-md-8">
-                                <input type="text" name="tripDays" class="form-control" placeholder="i.e: 5">
+                                <input type="number" name="tripDays" class="form-control" placeholder="i.e: 5" value="5">
                               </div>
                           </div>
 
@@ -84,7 +84,7 @@
                                 <label for="howFar" class="col-md-4 control-label"># Weeks Flexibility</label>
 
                                 <div class="col-md-8">
-                                    <input type="text" name="howFar" class="form-control" placeholder="i.e: 10">
+                                    <input type="number" name="howFar" class="form-control" placeholder="i.e: 10" value="1">
                                     <p class="help-block">Starting from departure date, how many weeks in the future flights can be. More flexibility can help to find cheaper prices.</p>
                                 </div>
                             </div>
@@ -117,28 +117,91 @@
                       </div> --}}
                       <div class="form-group">
                           <div class="col-md-2 col-md-offset-10">
-                              <button type="submit" class="btn btn-primary">
-                                  <i class="fa fa-btn fa-plane"></i> Find Flights
+                              <button type="submit" @click.prevent="submitForm()" class="btn btn-primary" :disabled="processing">
+                                  <i class="fa fa-btn fa-plane" :class="{'fa-spin': processing}"></i> Find Flights
                               </button>
                           </div>
                       </div>
                   </form>
 
                 </div>
+                <div class="panel-footer">
+                    <p class="text-right">
+                        <a href="http://www.skyscanner.net" class="logo">Powered by <img src="http://business.skyscanner.net/Content/images/logo/ssf-white-color.png" width="211" height="47" alt="Skyscanner"></a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
+    </template>
+
+    <template v-if="routes">
+        @include('results')
+    </template>
+
+
 </div>
 @endsection
 
 
 @section('scripts')
-  <script type="text/javascript">
-  $(document).ready(function(){
-    $('form').submit(function(e){
-      $(this).find('button[type="submit"]').addClass('disabled');
-      $(this).find('.fa-plane').addClass('fa-spin');
-    })
-  })
-  </script>
+<script type="text/javascript">
+    new Vue({
+      el: '#app',
+      data: {
+          processing: false,
+          routes: null,
+          carriers: null,
+          airports: null,
+          priceRange: null,
+          filters: {
+              priceRange: {
+                  min: 0,
+                  max: 1000
+              },
+              carrier: '',
+              query: ''
+          },
+          searchName: ''
+      },
+      methods: {
+          submitForm: function () {
+              this.processing = true
+              var url = $('form').attr('action') + '?' + $('form').serialize()
+              this.$http.get(url).then(response => {
+                var data = response.data
+                this.searchName = data.name
+                this.routes = data.routes
+                this.carriers = data.carriers
+//                this.airports = []
+                this.processing = false
+                this.priceRange = {min: data.priceRange.min, max: data.priceRange.max }
+                this.filters.priceRange = data.priceRange
+              }).catch(error => {
+                  alert('Error! Please try again later.')
+                  this.processing = false
+              })
+          },
+          resetSearch: function() {
+            this.routes = null
+            this.carriers = null
+            this.airports = null
+          },
+          resetFilters() {
+                this.filters.priceRange = this.priceRange
+                this.filters.carrier = ''
+          },
+          priceRangeFilter: function(value) {
+            var price = value.$value.price
+            return this.filters.priceRange.min <= price && this.filters.priceRange.max >= price
+          }
+      }
+    });
+//  $(document).ready(function(){
+//    $('form').submit(function(e){
+//      $(this).find('button[type="submit"]').addClass('disabled');
+//      $(this).find('.fa-plane').addClass('fa-spin');
+//    })
+//  })
+</script>
 @endsection

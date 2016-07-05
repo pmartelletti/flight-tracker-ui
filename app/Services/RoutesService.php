@@ -14,7 +14,7 @@ class RoutesService
     public function __construct($key = '')
     {
         $this->apiKey = $key;
-        $this->baseUri = 'http://partners.api.skyscanner.net/apiservices/browseroutes/v1.0/ES/EUR/en-GB';
+        $this->baseUri = 'http://partners.api.skyscanner.net/apiservices/browseroutes/v1.0/GB/EUR/en-GB';
         $this->suitableRoutes = new SuitableRoutes();
     }
 
@@ -23,7 +23,7 @@ class RoutesService
         return new RoutesService($key);
     }
 
-    public function findSuitableRoutes($origin, $destination, $startDate, $nights, $dayOfWeek, $weeksFlexibility)
+    public function findSuitableRoutes($origin, $destination, $startDate, $nights, $dayOfWeek, $weeksFlexibility, $ip)
     {
         $isStartingDay = sprintf('is%s', $dayOfWeek);
         $start = (new Carbon($startDate));
@@ -33,7 +33,7 @@ class RoutesService
         foreach($dates as $date) {
             $currentStart = Carbon::instance($date);
             $currentEnd = $currentStart->copy()->addDays($nights);
-            $this->findRoutesForDates($origin, $destination, $currentStart, $currentEnd);
+            $this->findRoutesForDates($origin, $destination, $currentStart, $currentEnd, $ip);
         }
 
         $name = "Available {$nights} nights trip from {$origin} to {$destination}, starting on {$startDate}, for the following {$weeksFlexibility} {$dayOfWeek}s";
@@ -41,11 +41,11 @@ class RoutesService
         return $this->suitableRoutes->setName($name);
     }
 
-    private function findRoutesForDates($origin, $destination, Carbon $from, Carbon $to)
+    private function findRoutesForDates($origin, $destination, Carbon $from, Carbon $to, $ip)
     {
         $client = new Client();
         $url = sprintf('%s/%s/%s/%s/%s?apiKey=%s', $this->baseUri, $origin, $destination, $from->format('Y-m-d'), $to->format('Y-m-d'), $this->apiKey);
-        $response = $client->request('GET', $url);
+        $response = $client->request('GET', $url, ['headers' => ['Accept' => 'application/json', 'X-Forwarded-For' => $ip]]);
         $jsonResults = json_decode((string) $response->getBody(), true);
 
         $this->suitableRoutes->parseAndAdd($jsonResults);
