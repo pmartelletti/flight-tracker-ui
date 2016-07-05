@@ -72,7 +72,7 @@ class SuitableRoutes implements \IteratorAggregate
             return [
                 'price' => $quote['MinPrice'],
                 'direct' => $quote['Direct'],
-                'daysQuoted' => (new Carbon($quote['QuoteDateTime']))->diffForHumans(Carbon::now()),
+                'daysQuoted' => (new Carbon($quote['QuoteDateTime']))->diffForHumans(),
                 'outbound' => [
                     'carrier' => $self->getCarriers()->get(collect($outbound['CarrierIds'])->first()),
                     'origin' => $self->getPlaces()->get($outbound['OriginId']),
