@@ -63,7 +63,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <template v-for="route in routes | filterBy filters.carrier | filterBy priceRangeFilter | orderBy price">
+                    <template v-for="route in routes | filterBy filters.carrier | filterBy priceRangeFilter | sortBy price">
                         <tr>
                             <td>@{{ route.outbound.carrier }}</td>
                             <td>@{{ route.outbound.origin }}</td>
